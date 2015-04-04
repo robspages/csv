@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  import_id: 
+  field_id: 
+  value: MyString
+
+two:
+  import_id: 
+  field_id: 
+  value: MyString

@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  name: 
+  type: 
+  maxLen: 
+  minLen: 1
+
+two:
+  name: 
+  type: 
+  maxLen: 
+  minLen: 1
