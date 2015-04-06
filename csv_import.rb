@@ -1,5 +1,13 @@
-require "Rails"
-require "CSV"
+require 'rubygems'
+require 'CSV'
+
+class Field
+  attr_accessor :name
+  attr_accessor :type
+  attr_accessor :minLen
+  attr_accessor :maxLen
+  attr_accessor :val
+end
 
 class ImportFile
   attr_accessor :headerrow
@@ -12,55 +20,108 @@ class ImportFile
     f[:type] = type
     f[:minLen] = min
     f[:maxLen] = max
-    f.save
-
-    (self.fields ||= []) << f
+    @fields = @fields || []
+    @fields << f
   end
 
-  def setHeaderrow(fields)
-    fields.each do |field|
-      (self.headerrow ||= []) << field.name
+  def addLiteralField(name,type,val)
+    f = Field.new
+    f[:name] = name
+    f[:type] = type
+    f[:minLen] = 0
+    f[:maxLen] = 1
+    f[:val] = val
+    @fields = @fields || []
+    @fields << f
+  end
+
+  def setHeaderrow
+    @headerrow = @headerrow || []
+    @fields.each do |field|
+      @headerrow << field[:name]
     end
   end
 
   def generate_file(filename, rowCount)
     i = 0
-    self.fields = []
+    @rows = @rows || []
     while i < rowCount
-      self.rows << makeARow(self.fields)
+      @rows << makeARow
+      i += 1
     end
-
-    # write the file. See RubyScripts for examples
+    outputFile(filename)
   end
 
-  def makeARow(fields)
-    fields.each do |field|
-      case field.type
+  def makeARow
+    row = []
+    @fields.each do |field|
+      case field[:type]
       when "string"
         row << makeAString
       when "text"
         row << makeASentence
       when "integer"
-        row << makeANumber
+        row << makeANumber(field[:minLen], field[:maxLen])
+      when "literal"
+        row << field[:val]
+      else
+        row << "unparseable"
       end
     end
     row
   end
 
   def makeAString
-    words = ["skin", "request", "religion", "distribution", "jellyfish", "color", "hour", "stove", "glove", "pig", "committee", "coat", "fairies", "guide", "burst", "cats", "jump", "eggnog", "beds", "caption"]
+    words = ["Lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "Maecenas", "egestas", "rhoncus", "vehicula", "Vestibulum", "tincidunt", "nisl", "sit", "amet", "dignissim", "dignissim", "Quisque", "eget", "mattis", "sem", "ut", "convallis", "lorem", "Vivamus", "pharetra", "elit", "quis", "convallis", "lobortis", "Quisque", "dui", "massa", "dapibus", "vestibulum", "massa", "at", "sagittis", "varius", "justo", "Praesent", "sit", "amet", "porta", "lectus", "Ut", "ultricies", "orci", "at", "ipsum", "condimentum", "non", "vulputate", "nibh", "aliquet", "Vivamus", "eu", "efficitur", "libero", "In", "quis", "risus", "euismod", "cursus", "ligula", "non", "lacinia", "erat", "Nunc", "efficitur", "semper", "leo", "nec", "tempus", "diam", "vehicula", "et", "Interdum", "et", "malesuada", "fames", "ac", "ante", "ipsum", "primis", "in", "faucibus", "Pellentesque", "malesuada", "et", "velit", "et", "iaculis", "Aenean", "non", "egestas", "velit", "Duis"]
     words.sample
   end
 
   def makeASentence
     sentence = []
-    while i < [4..10].sample
-      sentence << MakeAString
+    i = 0
+    r = rand(4..14)
+    while i < r
+      sentence << makeAString
+      i += 1
     end
-    sentence.join(" ") + "."
+    sentence.join(" ")
   end
 
   def makeANumber(min, max)
-    [min...max].sample
+    rand(min..max)
+  end
+
+  def makeADate(dString)
+
+  end
+
+  def outputFile(filename)
+    CSV.open(filename, "w", :skip_blanks => true, :force_quotes =>true) do |csv|
+      csv << @headerrow
+      @rows.each do |row|
+        csv << row
+      end
+    end
   end
 end
+
+
+i = ImportFile.new
+
+i.addField("PogDBKey", "integer", 1000, 1002)
+i.addLiteralField("Effective Campaign", "literal", "2015/04/01")
+i.addLiteralField("Category", "literal", "Books")
+i.addLiteralField("Title", "literal", "Tech Books")
+i.addLiteralField("Subtitle", "literal", "8Ft 6Ft")
+i.addField("Pog Segment",  "integer", 1000, 1002)
+i.addField("Segment",  "integer", 1,5)
+i.addField("Product DBKey",  "integer", 1, 1000)
+i.addField("x",  "integer", 0, 288)
+i.addField("y",  "integer", 0, 96)
+i.addLiteralField("GS1Code", "literal", "11-0-000-NE")
+
+i.setHeaderrow
+i.generate_file("/Users/rallen/Desktop/sample.csv", 200)
+
+
+
