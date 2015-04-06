@@ -16,21 +16,21 @@ class ImportFile
 
   def addField(name,type,min=0,max=1000)
     f = Field.new
-    f[:name] = name
-    f[:type] = type
-    f[:minLen] = min
-    f[:maxLen] = max
+    f.name = name
+    f.type = type
+    f.minLen = min
+    f.maxLen = max
     @fields = @fields || []
     @fields << f
   end
 
   def addLiteralField(name,type,val)
     f = Field.new
-    f[:name] = name
-    f[:type] = type
-    f[:minLen] = 0
-    f[:maxLen] = 1
-    f[:val] = val
+    f.name = name
+    f.type = type
+    f.minLen = 0
+    f.maxLen = 1
+    f.val = val
     @fields = @fields || []
     @fields << f
   end
@@ -38,7 +38,7 @@ class ImportFile
   def setHeaderrow
     @headerrow = @headerrow || []
     @fields.each do |field|
-      @headerrow << field[:name]
+      @headerrow << field.name
     end
   end
 
@@ -55,15 +55,15 @@ class ImportFile
   def makeARow
     row = []
     @fields.each do |field|
-      case field[:type]
+      case field.type
       when "string"
         row << makeAString
       when "text"
         row << makeASentence
       when "integer"
-        row << makeANumber(field[:minLen], field[:maxLen])
+        row << makeANumber(field.minLen, field.maxLen)
       when "literal"
-        row << field[:val]
+        row << field.val
       else
         row << "unparseable"
       end
